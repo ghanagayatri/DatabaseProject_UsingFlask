@@ -13,14 +13,11 @@ class QuerySelectForm(Form):
 		(7, 'Select From Where Group By Having'),
 		(8, 'Select From Where with two joins,max and avg functions'),
 		(9,'Select From Where With Not and In Operator,Nested Query'),
-		(10,'Set Command With Where Clause'),
-		(11,'Update With Where Clause'),
-		(12,'Create User'),
-		(13,'Drop User'),
-		(14,'Start Transaction'),
-		(15,'Rollback Transaction'),
-		(16,'Create Table'),
-		(17,'Insert Rows into Table')] ,validators=[Required()]) 
+		(10,'Update With Where Clause'),
+		(11,'Create User'),
+		(12,'Drop User'),
+		(13,'Create Table'),
+		(14,'Insert Rows into Table')] ,validators=[Required()]) 
 	submit = SubmitField('Submit')
 
 class SelectFromWhereForm(Form):
@@ -41,6 +38,19 @@ class SelectFromWhereOrderByLimitForm(Form):
 	limit = TextField("Enter a Number For Limit ",validators=[Required()])
 	submit = SubmitField('Execute Query')
 
+class SelectFromWhereJoinForm(Form):
+	table1 = TextField("First Table Name",validators=[Required()])
+	table2 = TextField("Second Table Name",validators=[Required()])
+	join = TextField("Enter Whether Left/Right/Outer Join",validators=[Required()])
+	oncondition = TextField("ON Condition",validators=[Required()])
+	submit = SubmitField('Execute Query')
+
+class UpdateWhereSetForm(Form):
+	table = TextField("Table Name",validators=[Required()])
+	setcondition = TextField("Set Condition",validators=[Required()])
+	where_condition = TextField("Where Condition",validators = [Required()])
+	submit = SubmitField('Execute Query')
+
 class InsertIntoTableForm(Form):
 	query = TextAreaField("Enter Insert Query",validators = [Required()])
 	submit = SubmitField('Execute Query')
@@ -59,4 +69,16 @@ class DropUserForm(Form):
 	submit = SubmitField('Execute Query')
 
 class SelectWhereGroupBy(Form):
+	selectcondition = TextField("Enter the Column names and Aggregate function ",validators=[Required()])
+	tablename = TextField("Table Name",validators=[Required()])
+	where_condition = TextField("Where Condition In Format Column = Value",validators=[Required()])
+	groupby = TextField("GroupByColumn",validators=[Required()])
+	submit = SubmitField('Execute Query')
 
+class SelectWhereGroupByHaving(Form):
+	selectcondition = TextField("Enter the Column names and Aggregate function ",validators=[Required()])
+	tablename = TextField("Table Name",validators=[Required()])
+	where_condition = TextField("Where Condition In Format Column = Value",validators=[Required()])
+	groupby = TextField("GroupByColumn",validators=[Required()])
+	having =  TextField("Having Condition",validators=[Required()])
+	submit = SubmitField('Execute Query')

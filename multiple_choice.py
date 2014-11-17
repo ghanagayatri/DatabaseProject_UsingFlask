@@ -6,17 +6,18 @@ from flask.ext.bootstrap import Bootstrap
 from flask.ext.wtf import Form
 from flask.ext.sqlalchemy import SQLAlchemy
 from forms import QuerySelectForm,SelectFromWhereForm,SelectFromWhereOrderByForm,SelectFromWhereOrderByLimitForm
-from forms import InsertIntoTableForm,CreateTableForm,CreateUserForm,DropUserForm
+from forms import InsertIntoTableForm,CreateTableForm,CreateUserForm,DropUserForm,SelectWhereGroupBy,SelectWhereGroupByHaving
+from forms import SelectFromWhereJoinForm,UpdateWhereSetForm
 ############ Connection to Postgres Database ##################
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] ='postgresql://postgres:********@localhost/Normalized'
+app.config['SQLALCHEMY_DATABASE_URI'] ='postgresql://postgres:ramakrishna1@localhost/Normalized'
 app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
 db = SQLAlchemy(app)
 
 ################## Secret key to validate the Web App ##########
 
-app.config['SECRET_KEY'] = '********'
+app.config['SECRET_KEY'] = 'gayatri'
 ################################################################
 
 
@@ -51,34 +52,132 @@ def index():
 		return redirect(url_for('selectwhereorderby'))
 	if query == 4:
 		return redirect(url_for('selectwhereorderbylimit'))
+	if query == 5:
+		return redirect(url_for('selectwherejoin'))
 	if query == 6:
 		return redirect(url_for('selectwheregroupby'))
 	if query == 7:
 		return redirect(url_for('selectwheregroupbyhaving'))
-	if query == 12:
+	if query == 8:
+		return redirect(url_for('selectwheretwojoins'))
+	if query == 9:
+		return redirect(url_for('selectwherenestedquery'))
+	if query == 10:
+		return redirect(url_for('updatewhere'))
+	if query == 11:
 		return redirect(url_for('createuser'))
-	if query == 13:
+	if query == 12:
 		return redirect(url_for('dropuser'))
-	if query == 16:
+	if query == 13:
 		return redirect(url_for('createtable'))
-	if query == 17:
+	if query == 14:
 		return redirect(url_for('insertintotable'))
 	else:
 		return flask.render_template('index.html', form=form)
-###########################################################
+#############################################################
 
+##################### Update Where function #################
+@app.route('/updatewhere', methods=['GET', 'POST'])
+def updatewhere():
+	form = UpdateWhereSetForm()
+	table = form.table.data
+	setcondition = form.setcondition.data
+	where_condition = form.where_condition.data
+	if not table:
+		return flask.render_template('querydetails.html',form = form)
+	else:
+		try:
+			UpdateQuery = "UPDATE " + table + " SET " + setcondition +" WHERE " +where_condition +';'
+			Columns_Query = "SELECT column_name FROM information_schema.columns WHERE table_name ='"+ table +"'"
+			Select_Query = " SELECT * FROM "+ table + " WHERE " + where_condition;
+			Final_Result = callDatabase(db,Columns_Query,Select_Query)
+			db.engine.execute(UpdateQuery)
+			if form.validate_on_submit():
+				flash(UpdateQuery)
+				return flask.render_template('querydetails.html',form = form,result = Final_Result)
+		except Exception:
+			flash("Something Wrong With The Query")
+			return flask.render_template('querydetails.html',form = form)
 
-#################### selectwheregroupby function ##########
+##################### selectwhere join function #############
+@app.route('/selectwherejoin', methods=['GET', 'POST'])
+def selectwherejoin():
+	form = SelectFromWhereJoinForm()
+	table1 = form.table1.data
+	table2 = form.table2.data
+	join = form.join.data
+	oncondition = form.oncondition.data
+	if not table1:
+		return flask.render_template('querydetails.html',form = form)
+	else:
+		Query = "SELECT * FROM " + table1 + join + table2 +"ON" +oncondition +';'
+		result = db.engine.execute(Query).fetchall()
+		rows = map(list,result)
+		result_set = []
+		for row in rows:
+   			tuple = [str(x) for x in row]
+  			result_set.append(tuple)
+		try:
+			if form.validate_on_submit():
+				flash(Query)
+				return flask.render_template('querydetails.html',form = form,result = result_set)
+		except Exception:
+			flash("Something Wrong With The Query")
+			return flask.render_template('querydetails.html',form = form)
+
+# #################### selectwheregroupby function ##########
 @app.route('/selectwheregroupby', methods=['GET', 'POST'])
 def selectwheregroupby():
-
-
+	form = SelectWhereGroupBy()
+	selectcondition = form.selectcondition.data
+	tablename = form.tablename.data
+	where_condition = form.where_condition.data
+	groupby = form.groupby.data
+	if not selectcondition:
+		return flask.render_template('querydetails.html',form = form)
+	else:
+		Query = "SELECT " + selectcondition + " FROM " + tablename + " WHERE " + where_condition + " GROUP BY " + groupby+';'
+		result = db.engine.execute(Query).fetchall()
+		rows = map(list,result)
+		result_set = []
+		for row in rows:
+   			tuple = [str(x) for x in row]
+  			result_set.append(tuple)
+		try:
+			if form.validate_on_submit():
+				flash(Query)
+				return flask.render_template('querydetails.html',form = form,result = result_set)
+		except Exception:
+			flash("Something Wrong With The Query")
+			return flask.render_template('querydetails.html',form = form)
 
 
 #################selectwheregroupbyhaving function ########
 @app.route('/selectwheregroupbyhaving', methods=['GET', 'POST'])
 def selectwheregroupbyhaving():
-	
+	form = SelectWhereGroupByHaving()
+	selectcondition = form.selectcondition.data
+	tablename = form.tablename.data
+	where_condition = form.where_condition.data
+	groupby = form.groupby.data
+	having = form.having.data
+	if not selectcondition:
+		return flask.render_template('querydetails.html',form = form)
+	else:
+		Query = "SELECT " + selectcondition + " FROM " + tablename + " WHERE " + where_condition + " GROUP BY " + groupby+ " HAVING " + having+';'
+		result = db.engine.execute(Query).fetchall()
+		rows = map(list,result)
+		result_set = []
+		for row in rows:
+   			tuple = [str(x) for x in row]
+  			result_set.append(tuple)
+		try:
+			if form.validate_on_submit():
+				flash(Query)
+				return flask.render_template('querydetails.html',form = form,result = result_set)
+		except Exception:
+			flash("Something Wrong With The Query")
+			return flask.render_template('querydetails.html',form = form)
 
 
 
@@ -131,9 +230,18 @@ def createtable():
 	else:
 		try:
 			if form.validate_on_submit():
+				# This creates the table
 				db.engine.execute(create_table)
+				# This gets all the table names in the schema
+				Tables_Query = "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';"
+				result = db.engine.execute(Tables_Query)
+				rows = map(list,result)
+				result_set = []
+				for row in rows:
+   					tuple = [str(x) for x in row]
+  					result_set.append(tuple)
 				flash("Table Creation Successfull !")
-				return flask.render_template('querydetails.html',form = form)
+				return flask.render_template('querydetails.html',form = form,result = result_set)
 		except Exception:
 			flash("Something Wrong With The Create Table Query")
 			return flask.render_template('querydetails.html',form = form)
