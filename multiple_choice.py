@@ -11,13 +11,13 @@ from forms import SelectFromWhereJoinForm,UpdateWhereSetForm
 ############ Connection to Postgres Database ##################
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] ='postgresql://postgres:ramakrishna1@localhost/Normalized'
+app.config['SQLALCHEMY_DATABASE_URI'] ='postgresql://postgres:********@localhost/Normalized'
 app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
 db = SQLAlchemy(app)
 
 ################## Secret key to validate the Web App ##########
 
-app.config['SECRET_KEY'] = 'gayatri'
+app.config['SECRET_KEY'] = '******'
 ################################################################
 
 
