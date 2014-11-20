@@ -11,13 +11,12 @@ class QuerySelectForm(Form):
 		(5, 'Select From Where with an implied join'),
 		(6, 'Select From Where Group By'),
 		(7, 'Select From Where Group By Having'),
-		(8, 'Select From Where with two joins,max and avg functions'),
-		(9,'Select From Where With Not and In Operator,Nested Query'),
-		(10,'Update With Where Clause'),
-		(11,'Create User'),
-		(12,'Drop User'),
-		(13,'Create Table'),
-		(14,'Insert Rows into Table')] ,validators=[Required()]) 
+		(8, 'customized query'),
+		(9,'Update With Where Clause'),
+		(10,'Create User'),
+		(11,'Drop User'),
+		(12,'Create Table'),
+		(13,'Insert Rows into Table')] ,validators=[Required()]) 
 	submit = SubmitField('Submit')
 
 class SelectFromWhereForm(Form):
@@ -81,4 +80,8 @@ class SelectWhereGroupByHaving(Form):
 	where_condition = TextField("Where Condition In Format Column = Value",validators=[Required()])
 	groupby = TextField("GroupByColumn",validators=[Required()])
 	having =  TextField("Having Condition",validators=[Required()])
+	submit = SubmitField('Execute Query')
+
+class CustomizedQueryForm(Form):
+	query = TextAreaField("Enter The Query:",validators=[Required()])
 	submit = SubmitField('Execute Query')

@@ -7,17 +7,17 @@ from flask.ext.wtf import Form
 from flask.ext.sqlalchemy import SQLAlchemy
 from forms import QuerySelectForm,SelectFromWhereForm,SelectFromWhereOrderByForm,SelectFromWhereOrderByLimitForm
 from forms import InsertIntoTableForm,CreateTableForm,CreateUserForm,DropUserForm,SelectWhereGroupBy,SelectWhereGroupByHaving
-from forms import SelectFromWhereJoinForm,UpdateWhereSetForm
+from forms import SelectFromWhereJoinForm,UpdateWhereSetForm,CustomizedQueryForm
 ############ Connection to Postgres Database ##################
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] ='postgresql://postgres:********@localhost/Normalized'
+app.config['SQLALCHEMY_DATABASE_URI'] ='postgresql://postgres:**********@localhost/Normalized'
 app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
 db = SQLAlchemy(app)
 
 ################## Secret key to validate the Web App ##########
 
-app.config['SECRET_KEY'] = '******'
+app.config['SECRET_KEY'] = 'gayatri'
 ################################################################
 
 
@@ -59,22 +59,48 @@ def index():
 	if query == 7:
 		return redirect(url_for('selectwheregroupbyhaving'))
 	if query == 8:
-		return redirect(url_for('selectwheretwojoins'))
+		return redirect(url_for('customizedquery'))
 	if query == 9:
-		return redirect(url_for('selectwherenestedquery'))
-	if query == 10:
 		return redirect(url_for('updatewhere'))
-	if query == 11:
+	if query == 10:
 		return redirect(url_for('createuser'))
-	if query == 12:
+	if query == 11:
 		return redirect(url_for('dropuser'))
-	if query == 13:
+	if query == 12:
 		return redirect(url_for('createtable'))
-	if query == 14:
+	if query == 13:
 		return redirect(url_for('insertintotable'))
 	else:
 		return flask.render_template('index.html', form=form)
 #############################################################
+
+################## Cutomized Query function #################
+@app.route('/customizedquery', methods=['GET', 'POST'])
+def customizedquery():
+	form = CustomizedQueryForm()
+	query = form.query.data
+	if not query:
+		return flask.render_template('querydetails.html',form = form)
+	else:
+		columns = db.engine.execute(query)._metadata.keys
+		result = db.engine.execute(query).fetchall()
+		cols = []
+		for ele in columns:
+			cols.append(str(ele))
+		rows = map(list,result)
+		result_set = []
+		result_set.append(cols)
+		for row in rows:
+			tuple = [str(x) for x in row]
+			result_set.append(tuple)
+		try:
+			if form.validate_on_submit():
+				flash(query)
+				return flask.render_template('querydetails.html',form = form,result = result_set)
+		except Exception:
+			flash("Something Wrong With The Query")
+			return flask.render_template('querydetails.html',form = form)
+
 
 ##################### Update Where function #################
 @app.route('/updatewhere', methods=['GET', 'POST'])
